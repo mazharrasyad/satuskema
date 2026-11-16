@@ -7,6 +7,7 @@ const path = require('path');
 const { analyze } = require('./lib/analyzer');
 const llm = require('./lib/llm');
 const { search } = require('./lib/search');
+const mcp = require('./lib/mcp');
 
 loadEnv(path.join(__dirname, '.env'));
 
@@ -132,10 +133,33 @@ function serveStatic(req, res, url) {
   });
 }
 
+// MCP over Streamable HTTP (JSON responses, no server-initiated stream). Read-only tools, no auth needed.
+const MCP_CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept, mcp-protocol-version, mcp-session-id', 'access-control-expose-headers': 'mcp-session-id' };
+async function mcpEndpoint(req, res) {
+  if (req.method === 'OPTIONS') { res.writeHead(204, MCP_CORS); return res.end(); }
+  if (req.method !== 'POST') {
+    res.writeHead(405, { ...MCP_CORS, allow: 'POST, OPTIONS', 'content-type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ error: 'SatuSkema MCP endpoint: send JSON-RPC 2.0 messages with POST (Streamable HTTP transport).' }));
+  }
+  let payload;
+  try { payload = await readBody(req); } catch (e) {
+    const status = e.status === 413 ? 413 : 400;
+    res.writeHead(status, { ...MCP_CORS, 'content-type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: status === 413 ? 'Request too large' : 'Parse error' } }));
+  }
+  const ip = clientIp(req);
+  const out = await mcp.handle(payload, { llmAllowed: () => llmAllowed(ip) });
+  if (!out) { res.writeHead(202, MCP_CORS); return res.end(); }
+  res.writeHead(200, { ...MCP_CORS, 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(JSON.stringify(out));
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   try {
-    if (url.pathname.startsWith('/api/')) await api(req, res, url);
+    if (url.pathname === '/mcp') await mcpEndpoint(req, res);
+    else if (url.pathname.startsWith('/api/')) await api(req, res, url);
     else if (req.method === 'GET' || req.method === 'HEAD') serveStatic(req, res, url);
     else send(res, 405, { error: 'Method not allowed' });
   } catch (e) {

@@ -37,6 +37,9 @@ const I18N = {
     fileDict: 'satuskema-data-dictionary', fileSql: 'satuskema-consolidation.sql',
     examples: ['Which systems store NIK?', 'Where are residents\' addresses stored?', 'Which tables hold toddler data?', 'Which columns hold names of people other than the row\'s subject?'],
     aiBadgeOff: 'AI: off (deterministic)', aiBadgeUnknown: 'AI: unknown',
+    mcpTitle: 'For AI agents: MCP server',
+    mcpText: 'The same analysis is available to AI agents through the Model Context Protocol, so an agent can read legacy government schemas the way an engineer would.',
+    mcpTools: 'Tools: get_sample_schemas · analyze_schemas · get_data_dictionary · generate_consolidation_sql · ask_schema (read-only, structure only).',
   },
   id: {
     tagline: 'Satu data dimulai dari satu skema.',
@@ -69,6 +72,9 @@ const I18N = {
     fileDict: 'kamus-data-satuskema', fileSql: 'satuskema-konsolidasi.sql',
     examples: ['Sistem mana saja yang menyimpan NIK?', 'Di mana alamat warga disimpan?', 'Tabel apa yang berisi data balita?', 'Kolom mana yang berisi nama orang selain subjeknya?'],
     aiBadgeOff: 'AI: nonaktif (deterministik)', aiBadgeUnknown: 'AI: tidak diketahui',
+    mcpTitle: 'Untuk AI agent: server MCP',
+    mcpText: 'Analisis yang sama tersedia untuk AI agent melalui Model Context Protocol, sehingga agent bisa membaca skema sistem pemerintahan lama seperti seorang engineer.',
+    mcpTools: 'Tool: get_sample_schemas · analyze_schemas · get_data_dictionary · generate_consolidation_sql · ask_schema (hanya baca, hanya struktur).',
   },
 };
 
@@ -391,6 +397,15 @@ fetch('api/config').then((r) => r.json()).then((c) => {
   if (!c.llm) { $('#opt-ai').checked = false; $('#opt-ai').disabled = true; }
   renderBadge();
 }).catch(() => { llmConfig = undefined; renderBadge(); });
+
+// ---------- MCP ----------
+const MCP_URL = new URL('mcp', document.baseURI).href;
+$('#mcp-url').textContent = MCP_URL;
+$('#mcp-config').textContent = JSON.stringify({ mcpServers: { satuskema: { type: 'http', url: MCP_URL } } }, null, 2);
+$('#copy-mcp').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(MCP_URL); $('#copy-mcp').textContent = t('copied'); } catch { $('#copy-mcp').textContent = t('copyFail'); }
+  setTimeout(() => { $('#copy-mcp').textContent = t('copy'); }, 1500);
+});
 
 addSystem();
 applyStatic();

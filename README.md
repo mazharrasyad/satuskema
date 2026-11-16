@@ -37,6 +37,40 @@ The core analysis is deterministic, so results are explainable and repeatable. A
 
 Without an API key the app still works fully, with a keyword-search fallback for questions.
 
+## MCP server for AI agents
+
+SatuSkema is also a **Model Context Protocol** server, so AI agents can read legacy government schemas the way an engineer would. It fits the same idea as connecting agents to the systems an organisation already runs.
+
+- **Remote (Streamable HTTP):** `https://mazharrasyad.tech/satuskema/mcp`
+- **Local (stdio):** `node mcp-stdio.js`
+
+| Tool | What it returns |
+|---|---|
+| `get_sample_schemas` | Four synthetic sample systems to try the other tools with |
+| `analyze_schemas` | Stats, cross-system entities, findings with fixes, canonical model, Mermaid ERDs |
+| `get_data_dictionary` | Column-level dictionary (concept, role, confidence, description), optional filter |
+| `generate_consolidation_sql` | PostgreSQL master tables, union views and consolidation inserts |
+| `ask_schema` | Answer to a natural-language question, grounded in the parsed catalogue |
+
+All tools are read-only and take DDL only (`systems: [{ name, sql }]`, optional `lang: "en" | "id"`). Example client config:
+
+```json
+{ "mcpServers": { "satuskema": { "type": "http", "url": "https://mazharrasyad.tech/satuskema/mcp" } } }
+```
+
+Or for a local checkout:
+
+```json
+{ "mcpServers": { "satuskema": { "command": "node", "args": ["/path/to/satuskema/mcp-stdio.js"] } } }
+```
+
+Quick check with curl:
+
+```bash
+curl -s https://mazharrasyad.tech/satuskema/mcp -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
 ## Run locally
 
 ```bash
@@ -58,6 +92,7 @@ Only the **structure** (DDL) is uploaded, never row data, and the server stores 
 - `lib/analyzer.js`: column tagging, entity detection, findings, canonical model, Mermaid and SQL generation
 - `lib/llm.js`: optional AI layer (Gemini / Groq)
 - `lib/search.js`: keyword fallback for "Ask the schema"
+- `lib/mcp.js`: MCP server (tools, JSON-RPC); `mcp-stdio.js`: stdio transport
 - `server.js`: zero-dependency HTTP server
 - `public/`: web UI (EN/ID)
 

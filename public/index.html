@@ -111,6 +111,18 @@
         <div id="ask-out" class="answer"></div>
       </div>
     </section>
+    <section class="panel" aria-labelledby="mcp-title">
+      <div class="panel-head">
+        <h2 id="mcp-title" data-i18n="mcpTitle">For AI agents: MCP server</h2>
+      </div>
+      <p data-i18n="mcpText">The same analysis is available to AI agents through the Model Context Protocol, so an agent can read legacy government schemas the way an engineer would.</p>
+      <div class="row gap wrap-row">
+        <code id="mcp-url" class="mcp-url"></code>
+        <button id="copy-mcp" class="ghost" type="button" data-i18n="copy">Copy</button>
+      </div>
+      <p class="small muted" data-i18n="mcpTools">Tools: get_sample_schemas · analyze_schemas · get_data_dictionary · generate_consolidation_sql · ask_schema (read-only, structure only).</p>
+      <pre id="mcp-config" class="code"></pre>
+    </section>
   </main>
 
   <footer class="wrap foot" data-i18n="footer">
