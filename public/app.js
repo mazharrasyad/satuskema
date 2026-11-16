@@ -29,7 +29,7 @@ const I18N = {
     noFindings: 'No findings. The schemas are clean.', fix: 'Recommendation:',
     sev: { kritis: 'critical', tinggi: 'high', sedang: 'medium', rendah: 'low' },
     confTitle: 'match confidence', noEntities: 'No master entities (resident/civil servant/business) detected yet.',
-    as: 'as', via: 'via', key: 'key', sources: 'sources', canonAttr: 'Canonical attribute', referencedBy: 'Referenced by transaction tables: ',
+    as: 'as', via: 'via', key: 'key', source: 'source', sources: 'sources', canonAttr: 'Canonical attribute', referencedBy: 'Referenced by transaction tables: ',
     erdFail: 'Could not draw the ERD: ',
     dictCols: ['System', 'Table', 'Column', 'Type', 'Keys', 'Concept', 'Confidence', 'Description'], noDesc: 'no description yet',
     csvHead: ['system', 'table', 'column', 'type', 'pk', 'fk', 'concept', 'role', 'confidence', 'description', 'description_source'], yes: 'yes',
@@ -61,7 +61,7 @@ const I18N = {
     noFindings: 'Tidak ada temuan. Skema sudah rapi.', fix: 'Rekomendasi:',
     sev: { kritis: 'kritis', tinggi: 'tinggi', sedang: 'sedang', rendah: 'rendah' },
     confTitle: 'keyakinan pencocokan', noEntities: 'Belum ada entitas master (penduduk/pegawai/usaha) yang terdeteksi.',
-    as: 'sebagai', via: 'via', key: 'kunci', sources: 'sumber', canonAttr: 'Atribut kanonik', referencedBy: 'Dirujuk oleh tabel transaksi: ',
+    as: 'sebagai', via: 'via', key: 'kunci', source: 'sumber', sources: 'sumber', canonAttr: 'Atribut kanonik', referencedBy: 'Dirujuk oleh tabel transaksi: ',
     erdFail: 'Gagal menggambar ERD: ',
     dictCols: ['Sistem', 'Tabel', 'Kolom', 'Tipe', 'Kunci', 'Konsep', 'Keyakinan', 'Deskripsi'], noDesc: 'belum ada deskripsi',
     csvHead: ['sistem', 'tabel', 'kolom', 'tipe', 'pk', 'fk', 'konsep', 'peran', 'keyakinan', 'deskripsi', 'sumber_deskripsi'], yes: 'ya',
@@ -235,7 +235,7 @@ function renderEntities(r) {
     }).join('')}</tr>`).join('');
     const refs = e.references.length ? `<p class="small">${esc(t('referencedBy'))}${e.references.map((x) => `<code>${esc(x.system)}.${esc(x.table)}.${esc(x.column)}</code>`).join(', ')}</p>` : '';
     return `<section class="entity">
-      <h3>${esc(e.label)} <span class="tag">${esc(t('key'))}: ${esc(e.anchor.toUpperCase())}</span> <span class="tag">${e.sources.length} ${esc(t('sources'))}</span></h3>
+      <h3>${esc(e.label)} <span class="tag">${esc(t('key'))}: ${esc(e.anchor.toUpperCase())}</span> <span class="tag">${e.sources.length} ${esc(t(e.sources.length === 1 ? 'source' : 'sources'))}</span></h3>
       <p>${esc(e.desc)}</p>
       <div class="table-scroll"><table><thead><tr><th>${esc(t('canonAttr'))}</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>
       ${refs}
