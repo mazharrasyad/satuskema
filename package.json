@@ -1,0 +1,13 @@
+{
+  "name": "satuskema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Satukan skema database sistem pemerintahan: kamus data, entitas lintas sistem, ERD sebelum/sesudah, SQL konsolidasi.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

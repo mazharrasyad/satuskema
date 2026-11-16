@@ -1,0 +1,18 @@
+services:
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    command: node server.js
+    volumes:
+      - ./:/app:ro
+    environment:
+      - PORT=3170
+      - HOST=0.0.0.0
+      - BASE_PATH=/satuskema
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "127.0.0.1:3170:3170"
+    restart: unless-stopped
+    mem_limit: 256m

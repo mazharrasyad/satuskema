@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SatuSkema</title>
+  <meta name="description" content="Unify the database schemas of siloed government systems: automatic data dictionary, cross-system entity detection, before/after ERD and consolidation SQL.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <div class="brand">
+        <img src="favicon.svg" alt="" width="28" height="28">
+        <div>
+          <strong>SatuSkema</strong>
+          <span data-i18n="tagline">One data starts with one schema.</span>
+        </div>
+      </div>
+      <div class="row gap">
+        <span id="ai-badge" class="badge">AI: …</span>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="id" aria-pressed="false">ID</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1 data-i18n="heroTitle">Dozens of government systems, one citizen identity.</h1>
+      <p data-i18n="heroText">Paste the database schemas (DDL) of several legacy apps: health posts, small-business registry, civil-service performance, disease surveillance and more. SatuSkema reads their structure, finds the same data stored again and again (residents, civil servants, businesses, regions), then builds a data dictionary, a canonical model and the consolidation SQL.</p>
+      <p class="muted small" data-i18n="heroContext">Context: Indonesian agencies run hundreds of separate apps. Each one re-creates its own "resident" table keyed by NIK (the 16-digit national ID), so the same person exists in many inconsistent copies. National policy (Satu Data Indonesia) requires them to be unified.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="input-title">
+      <div class="panel-head">
+        <h2 id="input-title" data-i18n="step1">1. Source schemas</h2>
+        <div class="row gap">
+          <button id="btn-sample" class="ghost" type="button" data-i18n="loadSample">Load 4 sample systems</button>
+          <button id="btn-add" class="ghost" type="button" data-i18n="addSystem">+ Add system</button>
+        </div>
+      </div>
+      <div id="systems" class="systems"></div>
+      <div class="actions">
+        <label class="check"><input type="checkbox" id="opt-ai" checked> <span data-i18n="optAi">Enrich column descriptions with AI</span></label>
+        <button id="btn-analyze" class="primary" type="button" data-i18n="analyze">Analyze schemas</button>
+      </div>
+      <p class="hint" data-i18n-html="hint">Nothing is stored on the server. Upload only the <em>structure</em> (CREATE TABLE), not the data. MySQL and PostgreSQL are supported.</p>
+    </section>
+
+    <section id="results" class="panel" hidden aria-labelledby="res-title">
+      <div class="panel-head">
+        <h2 id="res-title" data-i18n="step2">2. Analysis results</h2>
+        <span id="ai-note" class="muted small"></span>
+      </div>
+      <div id="stats" class="stats"></div>
+
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="findings" aria-selected="true" data-i18n="tabFindings">Findings</button>
+        <button role="tab" data-tab="entities" data-i18n="tabEntities">Cross-system entities</button>
+        <button role="tab" data-tab="erd" data-i18n="tabErd">ERD before / after</button>
+        <button role="tab" data-tab="dictionary" data-i18n="tabDict">Data dictionary</button>
+        <button role="tab" data-tab="sql" data-i18n="tabSql">Consolidation SQL</button>
+        <button role="tab" data-tab="ask" data-i18n="tabAsk">Ask the schema</button>
+      </nav>
+
+      <div class="tab" id="tab-findings"></div>
+      <div class="tab" id="tab-entities" hidden></div>
+      <div class="tab" id="tab-erd" hidden>
+        <div class="erd-grid">
+          <div>
+            <div class="row between">
+              <h3 data-i18n="before">Before</h3>
+              <select id="erd-system" data-i18n-aria="pickSystem" aria-label="Pick a system"></select>
+            </div>
+            <div id="erd-before" class="erd"></div>
+          </div>
+          <div>
+            <h3 data-i18n="after">After: canonical model</h3>
+            <div id="erd-after" class="erd"></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab" id="tab-dictionary" hidden>
+        <div class="row between gap wrap-row">
+          <input id="dict-filter" type="search" data-i18n-ph="dictFilter" placeholder="Filter: nik, alamat, tb_balita…" data-i18n-aria="dictFilterAria" aria-label="Filter data dictionary">
+          <div class="row gap">
+            <button id="dl-csv" class="ghost" type="button" data-i18n="dlCsv">Download CSV</button>
+            <button id="dl-md" class="ghost" type="button" data-i18n="dlMd">Download Markdown</button>
+          </div>
+        </div>
+        <div class="table-scroll"><table id="dict-table"></table></div>
+      </div>
+      <div class="tab" id="tab-sql" hidden>
+        <div class="row gap end">
+          <button id="copy-sql" class="ghost" type="button" data-i18n="copy">Copy</button>
+          <button id="dl-sql" class="ghost" type="button" data-i18n="dlSql">Download .sql</button>
+        </div>
+        <pre id="sql-out" class="code"></pre>
+      </div>
+      <div class="tab" id="tab-ask" hidden>
+        <form id="ask-form" class="row gap">
+          <input id="ask-input" type="text" data-i18n-ph="askPh" placeholder="Which systems store residents' addresses?" data-i18n-aria="askAria" aria-label="Question" maxlength="500">
+          <button class="primary" type="submit" data-i18n="ask">Ask</button>
+        </form>
+        <div class="chips" id="ask-chips"></div>
+        <div id="ask-out" class="answer"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot" data-i18n="footer">
+    SatuSkema · Vibe-a-thon 2026 · Team HackRasaz · All sample schemas are synthetic.
+  </footer>
+
+  <template id="system-tpl">
+    <div class="system">
+      <div class="row gap">
+        <input class="sys-name" type="text" maxlength="60">
+        <label class="ghost file"><span class="file-label"></span><input type="file" accept=".sql,.txt" hidden></label>
+        <button class="icon remove" type="button">✕</button>
+      </div>
+      <textarea class="sys-sql" spellcheck="false" placeholder="CREATE TABLE warga (&#10;  nik CHAR(16) PRIMARY KEY,&#10;  nama VARCHAR(100),&#10;  ...&#10;);" aria-label="SQL DDL"></textarea>
+    </div>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
